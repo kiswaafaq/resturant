@@ -15,7 +15,6 @@ interface MenuItem {
 const HomePage: React.FC = () => {
   // State to manage the cart
   const [cart, setCart] = useState<MenuItem[]>([]);
-  const [cartCount, setCartCount] = useState<number>(0);  // To track number of items in cart
   const [showMessage, setShowMessage] = useState<string>('');  // Optional message for user feedback
 
   // Function to add items to the cart
@@ -23,16 +22,17 @@ const HomePage: React.FC = () => {
     setCart((prevCart) => {
       const existingItem = prevCart.find((cartItem) => cartItem.name === item.name);
       if (existingItem) {
+        // If item already exists, just increase its quantity
         return prevCart.map((cartItem) =>
           cartItem.name === item.name
             ? { ...cartItem, quantity: (cartItem.quantity || 0) + 1 }
             : cartItem
         );
       } else {
+        // Otherwise, add the item with quantity 1
         return [...prevCart, { ...item, quantity: 1 }];
       }
     });
-    setCartCount(cartCount + 1);  // Increment item count
     setShowMessage('Item added to cart!');  // Show feedback
     setTimeout(() => setShowMessage(''), 2000);  // Hide feedback after 2 seconds
   };
@@ -48,15 +48,17 @@ const HomePage: React.FC = () => {
             ? cartItem
             : null
         )
-        .filter(Boolean) as MenuItem[] 
+        .filter(Boolean) as MenuItem[]
     );
-    setCartCount(cartCount - 1);  // Decrement item count
   };
 
   // Scroll to Cart Section on Cart Icon Click
   const scrollToCart = () => {
     document.getElementById("cart-section")?.scrollIntoView({ behavior: "smooth" });
   };
+
+  // Calculate total items in cart
+  const cartCount = cart.reduce((total, item) => total + (item.quantity || 0), 0);
 
   return (
     <main className="min-h-screen p-6">
@@ -79,7 +81,7 @@ const HomePage: React.FC = () => {
       <section className="text-center py-8">
         <p className="mt-4 text-xl">Order delicious food online!</p>
         {showMessage && (
-          <p className="mt-4 text-green-500 font-semibold">{showMessage}</p> 
+          <p className="mt-4 text-green-500 font-semibold">{showMessage}</p>
         )}
       </section>
 
@@ -147,7 +149,6 @@ const HomePage: React.FC = () => {
               <button className="mt-4 px-6 py-3 bg-green-500 text-white font-semibold rounded-lg hover:bg-green-700">
                 Proceed to Checkout
               </button>
-              <CheckoutPage/>
             </div>
           </div>
         )}
@@ -161,8 +162,8 @@ const menuItems: MenuItem[] = [
   {
     name: "Biryani",
     description:
-      "Biryani is a mixed rice dish, mainly popular in South Asia. It is made with rice, some type of meat (chicken, goat, beef) and spices.",
-    price: 800,
+      "Biryani is a mixed rice dish, mainly popular in South Asia. It is made with rice, some type of meat (chicken, goat, beef) and spices. 1 plate biryani in just 600? fresh and clean!",
+    price: 600,
     image: "/biryani.jpg",
   },
   {
@@ -179,8 +180,8 @@ const menuItems: MenuItem[] = [
   },
   {
     name: "Gulab Jamun",
-    description: "Sweet confectionary or dessert popular in South Asia.",
-    price: 400,
+    description: "Sweet confectionary or dessert popular in South Asia. 4 Gulab Jamuns in just 500!",
+    price: 500,
     image: "/gulabjamun.webp",
   },
   {
@@ -190,5 +191,5 @@ const menuItems: MenuItem[] = [
     image: "/prawnkarhai.jpg",
   }
 ];
-import CheckoutPage from "@/app/checkout/page";
+
 export default HomePage;
