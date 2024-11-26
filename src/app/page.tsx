@@ -2,6 +2,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import { FaShoppingCart } from 'react-icons/fa'; // Import cart icon from React Icons
+import CheckoutPage from "@/app/checkout/page"; // Import CheckoutPage
 
 // Define the type for a menu item
 interface MenuItem {
@@ -13,9 +14,10 @@ interface MenuItem {
 }
 
 const HomePage: React.FC = () => {
-  // State to manage the cart
+  // State to manage the cart and checkout visibility
   const [cart, setCart] = useState<MenuItem[]>([]);
   const [showMessage, setShowMessage] = useState<string>('');  // Optional message for user feedback
+  const [showCheckout, setShowCheckout] = useState(false); // Manage checkout page visibility
 
   // Function to add items to the cart
   const addToCart = (item: MenuItem) => {
@@ -48,7 +50,7 @@ const HomePage: React.FC = () => {
             ? cartItem
             : null
         )
-        .filter(Boolean) as MenuItem[]
+        .filter(Boolean) as MenuItem[] // Filter out null values
     );
   };
 
@@ -146,10 +148,17 @@ const HomePage: React.FC = () => {
                   .reduce((total, item) => total + item.price * (item.quantity || 1), 0)
                   .toFixed(2)}
               </p>
-              <button className="mt-4 px-6 py-3 bg-green-500 text-white font-semibold rounded-lg hover:bg-green-700">
+              <button
+                className="mt-4 px-6 py-3 bg-green-500 text-white font-semibold rounded-lg hover:bg-green-700"
+                onClick={() => setShowCheckout(true)} // Trigger checkout page render
+              >
                 Proceed to Checkout
               </button>
-               <CheckoutPage/>
+
+              {/* Only render CheckoutPage when showCheckout is true */}
+              {showCheckout && cart.length > 0 && (
+                <CheckoutPage cart={cart.map(item => ({ ...item, quantity: item.quantity || 1 }))} />
+              )}
             </div>
           </div>
         )}
@@ -163,8 +172,8 @@ const menuItems: MenuItem[] = [
   {
     name: "Biryani",
     description:
-      "Biryani is a mixed rice dish, mainly popular in South Asia. It is made with rice, some type of meat (chicken, goat, beef) and spices. 1 plate biryani in just 600? fresh and clean!",
-    price: 600,
+      "Biryani is a mixed rice dish, mainly popular in South Asia. It is made with rice, some type of meat (chicken, goat, beef) and spices.",
+    price: 800,
     image: "/biryani.jpg",
   },
   {
@@ -181,8 +190,8 @@ const menuItems: MenuItem[] = [
   },
   {
     name: "Gulab Jamun",
-    description: "Sweet confectionary or dessert popular in South Asia. 4 Gulab Jamuns in just 500!",
-    price: 500,
+    description: "Sweet confectionary or dessert popular in South Asia.",
+    price: 400,
     image: "/gulabjamun.webp",
   },
   {
@@ -193,5 +202,4 @@ const menuItems: MenuItem[] = [
   }
 ];
 
-import CheckoutPage from "./checkout/page";
 export default HomePage;

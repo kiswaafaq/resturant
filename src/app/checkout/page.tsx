@@ -8,16 +8,13 @@ interface CartItem {
   quantity: number;
 }
 
-const CheckoutPage: React.FC = () => {
-  const [paymentMethod, setPaymentMethod] = useState<string>("COD"); // Default to COD
-  const [userInfo, setUserInfo] = useState({ name: "", address: "", contact: "" });
+interface CheckoutPageProps {
+  cart: CartItem[];
+}
 
-  // Placeholder cart data (replace with actual data from your backend or state management system)
-  const cart: CartItem[] = [
-    { name: "Chinese Rice", price: 600, quantity: 2 },
-    { name: "Manchurian", price: 700, quantity: 1 },
-    { name: "Gulab Jamun", price: 400, quantity: 3 },
-  ];
+const CheckoutPage: React.FC<CheckoutPageProps> = ({ cart }) => {
+  const [paymentMethod, setPaymentMethod] = useState<string>("COD");
+  const [userInfo, setUserInfo] = useState({ name: "", address: "", contact: "" });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setUserInfo({
@@ -28,8 +25,12 @@ const CheckoutPage: React.FC = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    const phonePattern = /^[0-9]{10}$/;
+    if (!phonePattern.test(userInfo.contact)) {
+      alert("Please enter a valid 10-digit contact number.");
+      return;
+    }
     alert(`Order confirmed! Payment method: ${paymentMethod}`);
-    // You can send this information to your backend or order system here.
   };
 
   return (
@@ -89,7 +90,8 @@ const CheckoutPage: React.FC = () => {
                 type="radio"
                 value="Online"
                 checked={paymentMethod === "Online"}
-                onChange={() => setPaymentMethod("Online")}
+                onChange={() => alert("Online payment coming soon!")}
+                disabled
               />
               Online Payment (Coming soon)
             </label>
@@ -104,7 +106,6 @@ const CheckoutPage: React.FC = () => {
         </button>
       </form>
 
-      {/* Checkout Summary */}
       <section className="mt-8">
         <h3 className="text-2xl font-bold">Order Summary</h3>
         <ul className="mt-4">
