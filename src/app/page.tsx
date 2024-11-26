@@ -1,8 +1,9 @@
 "use client";
+
 import { useState } from "react";
 import Image from "next/image";
-import { FaShoppingCart } from 'react-icons/fa'; // Import cart icon from React Icons
-import CheckoutPage from "@/app/checkout/page"; // Import CheckoutPage
+import { FaShoppingCart } from "react-icons/fa";
+import CheckoutPage from "@/app/checkout/page"; // Adjusted to avoid potential circular imports
 
 // Define the type for a menu item
 interface MenuItem {
@@ -10,33 +11,32 @@ interface MenuItem {
   description: string;
   price: number;
   image: string;
-  quantity?: number;
+  quantity?: number; // Optional for initial state but must be handled explicitly
 }
 
+// Define the HomePage component
 const HomePage: React.FC = () => {
-  // State to manage the cart and checkout visibility
-  const [cart, setCart] = useState<MenuItem[]>([]);
-  const [showMessage, setShowMessage] = useState<string>('');  // Optional message for user feedback
-  const [showCheckout, setShowCheckout] = useState(false); // Manage checkout page visibility
+  const [cart, setCart] = useState<MenuItem[]>([]); // Cart state
+  const [showMessage, setShowMessage] = useState<string>(""); // Feedback message
+  const [showCheckout, setShowCheckout] = useState(false); // Checkout page visibility
 
   // Function to add items to the cart
   const addToCart = (item: MenuItem) => {
     setCart((prevCart) => {
       const existingItem = prevCart.find((cartItem) => cartItem.name === item.name);
       if (existingItem) {
-        // If item already exists, just increase its quantity
         return prevCart.map((cartItem) =>
           cartItem.name === item.name
             ? { ...cartItem, quantity: (cartItem.quantity || 0) + 1 }
             : cartItem
         );
       } else {
-        // Otherwise, add the item with quantity 1
         return [...prevCart, { ...item, quantity: 1 }];
       }
     });
-    setShowMessage('Item added to cart!');  // Show feedback
-    setTimeout(() => setShowMessage(''), 2000);  // Hide feedback after 2 seconds
+
+    setShowMessage("Item added to cart!");
+    setTimeout(() => setShowMessage(""), 2000);
   };
 
   // Function to remove items from the cart
@@ -54,17 +54,17 @@ const HomePage: React.FC = () => {
     );
   };
 
-  // Scroll to Cart Section on Cart Icon Click
+  // Scroll to the cart section
   const scrollToCart = () => {
     document.getElementById("cart-section")?.scrollIntoView({ behavior: "smooth" });
   };
 
-  // Calculate total items in cart
+  // Calculate total items in the cart
   const cartCount = cart.reduce((total, item) => total + (item.quantity || 0), 0);
 
   return (
     <main className="min-h-screen p-6">
-      {/* Top Bar with Cart Icon */}
+      {/* Header Section */}
       <section className="flex justify-between items-center p-4 bg-yellow-600 text-white">
         <h1 className="text-4xl font-extrabold">Uzma Foods</h1>
         <div className="flex items-center space-x-4 cursor-pointer" onClick={scrollToCart}>
@@ -79,13 +79,10 @@ const HomePage: React.FC = () => {
         </div>
       </section>
 
-      {/* Hero Section */}
-      <section className="text-center py-8">
-        <p className="mt-4 text-xl">Order delicious food online!</p>
-        {showMessage && (
-          <p className="mt-4 text-green-500 font-semibold">{showMessage}</p>
-        )}
-      </section>
+      {/* Feedback Message */}
+      {showMessage && (
+        <p className="mt-4 text-green-500 font-semibold text-center">{showMessage}</p>
+      )}
 
       {/* Menu Section */}
       <section className="mt-8">
@@ -104,7 +101,7 @@ const HomePage: React.FC = () => {
                 className="rounded-lg"
               />
               <h3 className="mt-4 text-xl font-bold">{item.name}</h3>
-              <p className="mt-2">{item.description || "No description available."}</p>
+              <p className="mt-2">{item.description}</p>
               <p className="mt-4 font-semibold text-lg">Rs. {item.price}</p>
               <button
                 className="mt-4 px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-700"
@@ -131,75 +128,68 @@ const HomePage: React.FC = () => {
                   <p>Quantity: {item.quantity}</p>
                   <p>Total: Rs. {(item.price * (item.quantity || 1)).toFixed(2)}</p>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <button
-                    className="px-2 py-1 bg-red-500 text-white rounded"
-                    onClick={() => removeFromCart(item.name)}
-                  >
-                    Remove
-                  </button>
-                </div>
+                <button
+                  className="px-2 py-1 bg-red-500 text-white rounded"
+                  onClick={() => removeFromCart(item.name)}
+                >
+                  Remove
+                </button>
               </div>
             ))}
-            <div className="text-center">
-              <p className="text-lg font-bold">
-                Total: Rs.{" "}
-                {cart
-                  .reduce((total, item) => total + item.price * (item.quantity || 1), 0)
-                  .toFixed(2)}
-              </p>
-              <button
-                className="mt-4 px-6 py-3 bg-green-500 text-white font-semibold rounded-lg hover:bg-green-700"
-                onClick={() => setShowCheckout(true)} // Trigger checkout page render
-              >
-                Proceed to Checkout
-              </button>
-
-              {/* Only render CheckoutPage when showCheckout is true */}
-              {showCheckout && cart.length > 0 && (
-                <CheckoutPage cart={cart.map(item => ({ ...item, quantity: item.quantity || 1 }))} />
-              )}
-            </div>
+            <p className="text-lg font-bold text-center mt-4">
+              Total: Rs.{" "}
+              {cart
+                .reduce((total, item) => total + item.price * (item.quantity || 1), 0)
+                .toFixed(2)}
+            </p>
+            <button
+              className="mt-4 px-6 py-3 bg-green-500 text-white font-semibold rounded-lg hover:bg-green-700"
+              onClick={() => setShowCheckout(true)}
+            >
+              Proceed to Checkout
+            </button>
           </div>
+        )}
+        {showCheckout && cart.length > 0 && (
+          <CheckoutPage cart={cart.map((item) => ({ ...item, quantity: item.quantity || 1 }))} />
         )}
       </section>
     </main>
   );
 };
 
-// Sample menu data
+// Menu items array
 const menuItems: MenuItem[] = [
   {
     name: "Biryani",
-    description:
-      "Biryani is a mixed rice dish, mainly popular in South Asia. It is made with rice, some type of meat (chicken, goat, beef) and spices.",
+    description: "Flavorful rice dish with spices and meat.",
     price: 800,
     image: "/biryani.jpg",
   },
   {
     name: "Chinese Rice",
-    description: "Delicious fried rice with vegetables and egg.",
+    description: "Savory fried rice with vegetables and egg.",
     price: 600,
     image: "/rice.webp",
   },
   {
     name: "Manchurian",
-    description: "Tangy chicken Manchurian with a flavorful sauce. ",
+    description: "Tangy chicken in a flavorful sauce.",
     price: 700,
     image: "/manchurian.webp",
   },
   {
     name: "Gulab Jamun",
-    description: "Sweet confectionary or dessert popular in South Asia.",
+    description: "Sweet South Asian dessert.",
     price: 400,
     image: "/gulabjamun.webp",
   },
   {
-    name: "Prawn Karhai ",
-    description: "Prawn Karhai is a famous sea food.",
+    name: "Prawn Karhai",
+    description: "Spicy seafood specialty.",
     price: 1000,
     image: "/prawnkarhai.jpg",
-  }
+  },
 ];
 
 export default HomePage;
