@@ -1,101 +1,194 @@
+"use client";
+import { useState } from "react";
 import Image from "next/image";
+import { FaShoppingCart } from 'react-icons/fa'; // Import cart icon from React Icons
 
-export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
-  );
+// Define the type for a menu item
+interface MenuItem {
+  name: string;
+  description: string;
+  price: number;
+  image: string;
+  quantity?: number;
 }
+
+const HomePage: React.FC = () => {
+  // State to manage the cart
+  const [cart, setCart] = useState<MenuItem[]>([]);
+  const [cartCount, setCartCount] = useState<number>(0);  // To track number of items in cart
+  const [showMessage, setShowMessage] = useState<string>('');  // Optional message for user feedback
+
+  // Function to add items to the cart
+  const addToCart = (item: MenuItem) => {
+    setCart((prevCart) => {
+      const existingItem = prevCart.find((cartItem) => cartItem.name === item.name);
+      if (existingItem) {
+        return prevCart.map((cartItem) =>
+          cartItem.name === item.name
+            ? { ...cartItem, quantity: (cartItem.quantity || 0) + 1 }
+            : cartItem
+        );
+      } else {
+        return [...prevCart, { ...item, quantity: 1 }];
+      }
+    });
+    setCartCount(cartCount + 1);  // Increment item count
+    setShowMessage('Item added to cart!');  // Show feedback
+    setTimeout(() => setShowMessage(''), 2000);  // Hide feedback after 2 seconds
+  };
+
+  // Function to remove items from the cart
+  const removeFromCart = (itemName: string) => {
+    setCart((prevCart) =>
+      prevCart
+        .map((cartItem) =>
+          cartItem.name === itemName && (cartItem.quantity || 0) > 1
+            ? { ...cartItem, quantity: (cartItem.quantity || 0) - 1 }
+            : cartItem.name !== itemName
+            ? cartItem
+            : null
+        )
+        .filter(Boolean) as MenuItem[] 
+    );
+    setCartCount(cartCount - 1);  // Decrement item count
+  };
+
+  // Scroll to Cart Section on Cart Icon Click
+  const scrollToCart = () => {
+    document.getElementById("cart-section")?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  return (
+    <main className="min-h-screen p-6">
+      {/* Top Bar with Cart Icon */}
+      <section className="flex justify-between items-center p-4 bg-yellow-600 text-white">
+        <h1 className="text-4xl font-extrabold">Uzma Foods</h1>
+        <div className="flex items-center space-x-4 cursor-pointer" onClick={scrollToCart}>
+          <div className="relative">
+            <FaShoppingCart size={24} />
+            {cartCount > 0 && (
+              <span className="absolute top-0 right-0 bg-red-500 text-white rounded-full px-2 py-1 text-sm">
+                {cartCount}
+              </span>
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* Hero Section */}
+      <section className="text-center py-8">
+        <p className="mt-4 text-xl">Order delicious food online!</p>
+        {showMessage && (
+          <p className="mt-4 text-green-500 font-semibold">{showMessage}</p> 
+        )}
+      </section>
+
+      {/* Menu Section */}
+      <section className="mt-8">
+        <h2 className="text-3xl font-bold text-center">Our Menu</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-6 justify-center">
+          {menuItems.map((item, index) => (
+            <div
+              key={index}
+              className="shadow-lg rounded-lg p-6 flex flex-col items-center bg-white"
+            >
+              <Image
+                src={item.image}
+                alt={item.name}
+                width={200}
+                height={150}
+                className="rounded-lg"
+              />
+              <h3 className="mt-4 text-xl font-bold">{item.name}</h3>
+              <p className="mt-2">{item.description || "No description available."}</p>
+              <p className="mt-4 font-semibold text-lg">Rs. {item.price}</p>
+              <button
+                className="mt-4 px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-700"
+                onClick={() => addToCart(item)}
+              >
+                Add to Cart
+              </button>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Cart Section */}
+      <section id="cart-section" className="mt-12">
+        <h2 className="text-3xl font-bold text-center">Your Cart</h2>
+        {cart.length === 0 ? (
+          <p className="text-center mt-4">Your cart is empty.</p>
+        ) : (
+          <div className="mt-6 shadow-lg rounded-lg p-6 bg-white">
+            {cart.map((item, index) => (
+              <div key={index} className="flex justify-between items-center mb-4">
+                <div>
+                  <h3 className="text-lg font-bold">{item.name}</h3>
+                  <p>Quantity: {item.quantity}</p>
+                  <p>Total: Rs. {(item.price * (item.quantity || 1)).toFixed(2)}</p>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <button
+                    className="px-2 py-1 bg-red-500 text-white rounded"
+                    onClick={() => removeFromCart(item.name)}
+                  >
+                    Remove
+                  </button>
+                </div>
+              </div>
+            ))}
+            <div className="text-center">
+              <p className="text-lg font-bold">
+                Total: Rs.{" "}
+                {cart
+                  .reduce((total, item) => total + item.price * (item.quantity || 1), 0)
+                  .toFixed(2)}
+              </p>
+              <button className="mt-4 px-6 py-3 bg-green-500 text-white font-semibold rounded-lg hover:bg-green-700">
+                Proceed to Checkout
+              </button>
+              <CheckoutPage/>
+            </div>
+          </div>
+        )}
+      </section>
+    </main>
+  );
+};
+
+// Sample menu data
+const menuItems: MenuItem[] = [
+  {
+    name: "Biryani",
+    description:
+      "Biryani is a mixed rice dish, mainly popular in South Asia. It is made with rice, some type of meat (chicken, goat, beef) and spices.",
+    price: 800,
+    image: "/biryani.jpg",
+  },
+  {
+    name: "Chinese Rice",
+    description: "Delicious fried rice with vegetables and egg.",
+    price: 600,
+    image: "/rice.webp",
+  },
+  {
+    name: "Manchurian",
+    description: "Tangy chicken Manchurian with a flavorful sauce. ",
+    price: 700,
+    image: "/manchurian.webp",
+  },
+  {
+    name: "Gulab Jamun",
+    description: "Sweet confectionary or dessert popular in South Asia.",
+    price: 400,
+    image: "/gulabjamun.webp",
+  },
+  {
+    name: "Prawn Karhai ",
+    description: "Prawn Karhai is a famous sea food.",
+    price: 1000,
+    image: "/prawnkarhai.jpg",
+  }
+];
+import CheckoutPage from "@/app/checkout/page";
+export default HomePage;
