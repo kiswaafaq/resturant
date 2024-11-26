@@ -149,6 +149,7 @@ const HomePage: React.FC = () => {
               <button className="mt-4 px-6 py-3 bg-green-500 text-white font-semibold rounded-lg hover:bg-green-700">
                 Proceed to Checkout
               </button>
+               <CheckoutPage/>
             </div>
           </div>
         )}
@@ -192,4 +193,5 @@ const menuItems: MenuItem[] = [
   }
 ];
 
+import CheckoutPage from "./checkout/page";
 export default HomePage;
